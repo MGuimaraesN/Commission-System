@@ -16,15 +16,23 @@ export const Periods: React.FC = () => {
     refreshPeriods();
   }, []);
 
-  const refreshPeriods = () => {
-    const data = getPeriods();
-    setPeriods(data);
+  const refreshPeriods = async () => {
+    try {
+      const data = await getPeriods();
+      setPeriods(data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleMarkPaid = (id: string) => {
+  const handleMarkPaid = async (id: string) => {
     if (confirm(t('periods.confirmClose'))) {
-      markPeriodAsPaid(id);
-      refreshPeriods();
+      try {
+        await markPeriodAsPaid(id);
+        refreshPeriods();
+      } catch (error: any) {
+        alert(error.message || "Error closing period");
+      }
     }
   };
 

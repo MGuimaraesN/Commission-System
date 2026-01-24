@@ -80,48 +80,63 @@ export const Dashboard: React.FC = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const fetchedOrders = getOrders();
-    const fetchedPeriods = getPeriods();
-    setOrders(fetchedOrders);
-    setPeriods(fetchedPeriods);
+    const loadData = async () => {
+      try {
+        const [fetchedOrders, fetchedPeriods, fetchedMonthlyStats, fetchedRankings] = await Promise.all([
+          getOrders(),
+          getPeriods(),
+          getMonthlyStats(),
+          getRankings()
+        ]);
 
-    const totalCommission = fetchedOrders.reduce((acc, o) => acc + o.commissionValue, 0);
-    const totalService = fetchedOrders.reduce((acc, o) => acc + o.serviceValue, 0);
-    
-    // Current Period
-    const todayStr = new Date().toISOString().split('T')[0];
-    const currentPeriod = fetchedPeriods.find(p => p.startDate <= todayStr && p.endDate >= todayStr);
-    const currentPeriodComm = currentPeriod ? currentPeriod.totalCommission : 0;
+        setOrders(fetchedOrders);
+        setPeriods(fetchedPeriods);
+        setMonthlyStats(fetchedMonthlyStats);
+        setRankings(fetchedRankings);
 
-    // Today Pulse
-    const todayOrders = fetchedOrders.filter(o => o.entryDate === todayStr);
-    const todayComm = todayOrders.reduce((acc, o) => acc + o.commissionValue, 0);
+        const totalCommission = fetchedOrders.reduce((acc, o) => acc + Number(o.commissionValue), 0);
+        const totalService = fetchedOrders.reduce((acc, o) => acc + Number(o.serviceValue), 0);
 
-    // Yesterday Pulse Calculation
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-    const yesterdayOrders = fetchedOrders.filter(o => o.entryDate === yesterdayStr);
-    const yesterdayComm = yesterdayOrders.reduce((acc, o) => acc + o.commissionValue, 0);
-    const pulseGrowth = yesterdayComm === 0 ? (todayComm > 0 ? 100 : 0) : ((todayComm - yesterdayComm) / yesterdayComm) * 100;
+        // Current Period
+        const todayStr = new Date().toISOString().split('T')[0];
+        // Ensure period dates are compared as strings YYYY-MM-DD (backend sends ISO usually but might be YYYY-MM-DD depending on logic, let's safe parse)
+        const currentPeriod = fetchedPeriods.find(p => {
+            const start = p.startDate.split('T')[0];
+            const end = p.endDate.split('T')[0];
+            return start <= todayStr && end >= todayStr;
+        });
+        const currentPeriodComm = currentPeriod ? Number(currentPeriod.totalCommission) : 0;
 
-    // Best Period
-    const best = [...fetchedPeriods].sort((a, b) => b.totalCommission - a.totalCommission)[0];
-    setBestPeriod(best);
+        // Today Pulse
+        const todayOrders = fetchedOrders.filter(o => o.entryDate.split('T')[0] === todayStr);
+        const todayComm = todayOrders.reduce((acc, o) => acc + Number(o.commissionValue), 0);
 
-    setStats({
-      totalCommission,
-      totalService,
-      count: fetchedOrders.length,
-      currentPeriodComm,
-      todayComm,
-      todayOrders: todayOrders.length,
-      pulseGrowth
-    });
+        // Yesterday Pulse Calculation
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayOrders = fetchedOrders.filter(o => o.entryDate.split('T')[0] === yesterdayStr);
+        const yesterdayComm = yesterdayOrders.reduce((acc, o) => acc + Number(o.commissionValue), 0);
+        const pulseGrowth = yesterdayComm === 0 ? (todayComm > 0 ? 100 : 0) : ((todayComm - yesterdayComm) / yesterdayComm) * 100;
 
-    setMonthlyStats(getMonthlyStats());
-    setRankings(getRankings());
+        // Best Period
+        const best = [...fetchedPeriods].sort((a, b) => Number(b.totalCommission) - Number(a.totalCommission))[0];
+        setBestPeriod(best);
 
+        setStats({
+          totalCommission,
+          totalService,
+          count: fetchedOrders.length,
+          currentPeriodComm,
+          todayComm,
+          todayOrders: todayOrders.length,
+          pulseGrowth
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      }
+    };
+    loadData();
   }, []);
 
   // Prepare Chart Data
@@ -129,9 +144,9 @@ export const Dashboard: React.FC = () => {
     .slice(0, 6)
     .reverse()
     .map(p => ({
-      name: `${p.startDate.slice(5)}`,
-      commission: p.totalCommission,
-      service: p.totalServiceValue
+      name: `${p.startDate.split('T')[0].slice(5)}`,
+      commission: Number(p.totalCommission),
+      service: Number(p.totalServiceValue)
     }));
 
   const pieData = [

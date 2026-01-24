@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  auditLogs    AuditLog[]
+}
+
+model Brand {
+  id        String         @id @default(uuid())
+  name      String         @unique
+  createdAt DateTime       @default(now())
+  orders    ServiceOrder[]
+}
+
+model Period {
+  id                String         @id @default(uuid())
+  startDate         DateTime
+  endDate           DateTime
+  paid              Boolean        @default(false)
+  paidAt            DateTime?
+  totalOrders       Int            @default(0)
+  totalServiceValue Decimal        @default(0)
+  totalCommission   Decimal        @default(0)
+  orders            ServiceOrder[]
+
+  @@unique([startDate, endDate])
+}
+
+model ServiceOrder {
+  id              String     @id @default(uuid())
+  osNumber        Int        @unique
+  entryDate       DateTime
+  customerName    String
+  serviceValue    Decimal
+  commissionValue Decimal
+  status          String     @default("PENDING") // PENDING, PAID
+  paymentMethod   String? // PIX, CASH, CARD, TRANSFER
+  createdAt       DateTime   @default(now())
+  paidAt          DateTime?
+
+  brandId         String
+  brand           Brand      @relation(fields: [brandId], references: [id])
+
+  periodId        String
+  period          Period     @relation(fields: [periodId], references: [id])
+
+  auditLogs       AuditLog[]
+}
+
+model AuditLog {
+  id             String        @id @default(uuid())
+  action         String
+  details        String?
+  timestamp      DateTime      @default(now())
+
+  userId         String?       // Make optional if system actions happen without user
+  user           User?         @relation(fields: [userId], references: [id])
+
+  serviceOrderId String?
+  serviceOrder   ServiceOrder? @relation(fields: [serviceOrderId], references: [id])
+}
+
+model Settings {
+  id                        String  @id @default(uuid())
+  fixedCommissionPercentage Decimal @default(10)
+  companyName               String?
+  companyCnpj               String?
+  companyAddress            String?
+  companyContact            String?
+  companyLogoUrl            String?
+  primaryColor              String?
+}
