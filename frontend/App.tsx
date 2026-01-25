@@ -9,6 +9,7 @@ import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 import { useAuth } from './services/auth';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const PrivateRoute = ({ children }: { children?: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
@@ -23,17 +24,18 @@ const PrivateRoute = ({ children }: { children?: React.ReactNode }) => {
 
 const App: React.FC = () => {
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/auth" element={<Login />} />
-        
-        <Route path="/" element={
-          <PrivateRoute>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </PrivateRoute>
-        } />
+    <ErrorBoundary>
+      <HashRouter>
+        <Routes>
+          <Route path="/auth" element={<Login />} />
+
+          <Route path="/" element={
+            <PrivateRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </PrivateRoute>
+          } />
         
         <Route path="/orders" element={
           <PrivateRoute>
@@ -75,9 +77,10 @@ const App: React.FC = () => {
           </PrivateRoute>
         } />
         
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </HashRouter>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </HashRouter>
+    </ErrorBoundary>
   );
 };
 

@@ -78,10 +78,12 @@ export const Dashboard: React.FC = () => {
 
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        setIsLoading(true);
         const [fetchedOrders, fetchedPeriods, fetchedMonthlyStats, fetchedRankings] = await Promise.all([
           getOrders(),
           getPeriods(),
@@ -134,10 +136,20 @@ export const Dashboard: React.FC = () => {
         });
       } catch (error) {
         console.error("Failed to load dashboard data", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     loadData();
   }, []);
+
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        </div>
+    );
+  }
 
   // Prepare Chart Data
   const lineData = periods

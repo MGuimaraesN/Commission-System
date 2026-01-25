@@ -74,18 +74,23 @@ export const Layout = ({ children }: LayoutProps) => {
 
   // Update pending count
   useEffect(() => {
-    const fetchPending = () => {
-        const orders = getOrders();
+    const fetchPending = async () => {
+      try {
+        const orders = await getOrders();
         const count = orders.filter(o => o.status === 'PENDING').length;
         setPendingCount(count);
+      } catch (error) {
+        // Silently fail for badge count updates to avoid blocking UI
+        console.warn("Failed to fetch pending count", error);
+      }
     };
     
     fetchPending();
-    window.addEventListener('storage', fetchPending);
-    const interval = setInterval(fetchPending, 2000); 
+    // window.addEventListener('storage', fetchPending); // localStorage listener no longer applies with API
+    const interval = setInterval(fetchPending, 10000); // Poll every 10s instead of 2s to save resources
 
     return () => {
-        window.removeEventListener('storage', fetchPending);
+        // window.removeEventListener('storage', fetchPending);
         clearInterval(interval);
     };
   }, []);
