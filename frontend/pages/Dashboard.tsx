@@ -215,7 +215,7 @@ export const Dashboard: React.FC = () => {
         <StatCard 
           title={t('dashboard.bestPeriod')}
           value={bestPeriod ? formatCurrency(bestPeriod.totalCommission) : '-'} 
-          subValue={bestPeriod ? `${bestPeriod.startDate} → ${bestPeriod.endDate}` : t('dashboard.noDataYet')}
+          subValue={bestPeriod ? `${new Date(bestPeriod.startDate).toLocaleDateString(language)} → ${new Date(bestPeriod.endDate).toLocaleDateString(language)}` : t('dashboard.noDataYet')}
           icon={Trophy} 
           color="text-amber-500" 
           variant="highlight"

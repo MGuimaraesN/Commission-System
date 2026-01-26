@@ -55,7 +55,9 @@ export const Periods: React.FC = () => {
                     <Calendar size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 dark:text-white text-lg tracking-tight">{period.startDate} → {period.endDate}</h3>
+                    <h3 className="font-bold text-slate-800 dark:text-white text-lg tracking-tight">
+                        {new Date(period.startDate).toLocaleDateString()} → {new Date(period.endDate).toLocaleDateString()}
+                    </h3>
                     <p className={`text-xs font-semibold uppercase tracking-wider ${period.paid ? 'text-emerald-600 dark:text-emerald-400' : 'text-indigo-600 dark:text-indigo-400'}`}>
                         {period.paid ? t('periods.closedPaid') : t('periods.openPeriod')}
                     </p>
