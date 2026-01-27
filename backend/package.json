@@ -23,7 +23,10 @@
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "glob": "^13.0.0",
+    "inflight": "^1.0.6",
     "prisma": "^7.3.0",
+    "rimraf": "^6.1.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {

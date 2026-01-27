@@ -15,7 +15,6 @@ import {
   FileBarChart,
   Globe
 } from 'lucide-react';
-import { useAuth } from '../services/auth';
 import { useTheme } from '../services/theme';
 import { useTranslation } from '../services/i18n';
 import { getOrders } from '../services/dataService';
@@ -50,18 +49,11 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { t, language, setLanguage } = useTranslation();
-  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const [pendingCount, setPendingCount] = useState(0);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/auth');
-  };
 
   const toggleLanguage = () => {
     setLanguage(language === 'pt-BR' ? 'en-US' : 'pt-BR');
@@ -120,20 +112,13 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className="mt-auto pt-6 border-t border-slate-200 dark:border-white/5">
            <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl mb-3 border border-slate-200 dark:border-white/5">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-200">
-                 {user?.name?.charAt(0).toUpperCase()}
+                 A
               </div>
               <div className="overflow-hidden">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{user?.name}</p>
+                  <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">Admin</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{t('common.authenticated')}</p>
               </div>
            </div>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors w-full group"
-          >
-            <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium text-sm">{t('common.signOut')}</span>
-          </button>
         </div>
       </aside>
 
@@ -158,13 +143,6 @@ export const Layout = ({ children }: LayoutProps) => {
           <SidebarItem to="/reports" icon={FileBarChart} label={t('common.reports')} />
           <SidebarItem to="/settings" icon={Settings} label={t('common.settings')} />
         </nav>
-        <button 
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors mt-auto"
-          >
-            <LogOut size={20} />
-            <span className="font-medium">{t('common.signOut')}</span>
-        </button>
       </div>
 
       {/* Main Content */}
