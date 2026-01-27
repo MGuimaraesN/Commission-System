@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, Lock, Calendar, DollarSign, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Lock, Calendar, DollarSign, AlertTriangle, Edit2, Plus, X } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { getPeriods, markPeriodAsPaid, initializeData } from '../services/dataService';
+import { Input } from '../components/ui/Input';
+import { getPeriods, markPeriodAsPaid, initializeData, createPeriod, updatePeriod } from '../services/dataService';
 import { Period } from '../types';
 import { useTranslation } from '../services/i18n';
 
 export const Periods: React.FC = () => {
   const { t } = useTranslation();
   const [periods, setPeriods] = useState<Period[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ startDate: '', endDate: '' });
 
   useEffect(() => {
-    // Initialize data for demo purposes if empty
     initializeData();
     refreshPeriods();
   }, []);
@@ -36,15 +39,72 @@ export const Periods: React.FC = () => {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+          if (editingId) {
+              await updatePeriod(editingId, formData);
+          } else {
+              await createPeriod(formData.startDate, formData.endDate);
+          }
+          setIsModalOpen(false);
+          refreshPeriods();
+          setEditingId(null);
+          setFormData({ startDate: '', endDate: '' });
+      } catch (e: any) {
+          alert(e.message || "Error saving period");
+      }
+  };
+
+  const openCreate = () => {
+      setEditingId(null);
+      setFormData({ startDate: '', endDate: '' });
+      setIsModalOpen(true);
+  }
+
+  const openEdit = (period: Period) => {
+      if (period.paid) {
+          alert("Cannot edit closed periods.");
+          return;
+      }
+      setEditingId(period.id);
+      // Format to YYYY-MM-DD
+      setFormData({
+          startDate: period.startDate.split('T')[0],
+          endDate: period.endDate.split('T')[0]
+      });
+      setIsModalOpen(true);
+  }
+
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{t('periods.title')}</h2>
-        <p className="text-slate-500 dark:text-slate-400 mt-1">{t('periods.subtitle')}</p>
+      <div className="flex justify-between items-center">
+        <div>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{t('periods.title')}</h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">{t('periods.subtitle')}</p>
+        </div>
+        <Button onClick={openCreate} icon={<Plus size={18} />}>
+            New Period
+        </Button>
       </div>
+
+      {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+              <Card className="w-full max-w-sm" title={editingId ? "Edit Period" : "New Period"}>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                      <Input type="date" label="Start Date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} required />
+                      <Input type="date" label="End Date" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} required />
+                      <div className="flex gap-2 pt-2">
+                          <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1">Cancel</Button>
+                          <Button type="submit" className="flex-1">Save</Button>
+                      </div>
+                  </form>
+              </Card>
+          </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {periods.map(period => (
@@ -63,7 +123,14 @@ export const Periods: React.FC = () => {
                     </p>
                   </div>
                </div>
-               {period.paid && <Lock size={18} className="text-slate-400 dark:text-slate-500" />}
+               <div className="flex gap-2">
+                   {!period.paid && (
+                       <button onClick={() => openEdit(period)} className="text-slate-400 hover:text-indigo-500 transition-colors">
+                           <Edit2 size={16} />
+                       </button>
+                   )}
+                   {period.paid && <Lock size={18} className="text-slate-400 dark:text-slate-500" />}
+               </div>
             </div>
 
             <div className="space-y-3 py-2">

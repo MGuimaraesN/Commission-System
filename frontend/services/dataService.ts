@@ -42,6 +42,26 @@ export const markPeriodAsPaid = async (periodId: string) => {
   }
 };
 
+export const createPeriod = async (start: string, end: string) => {
+    const res = await fetch(`${API_URL}/periods`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ startDate: start, endDate: end })
+    });
+    if (!res.ok) throw new Error('Failed to create period');
+    return res.json();
+};
+
+export const updatePeriod = async (id: string, updates: { startDate?: string, endDate?: string }) => {
+    const res = await fetch(`${API_URL}/periods/${id}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(updates)
+    });
+    if (!res.ok) throw new Error('Failed to update period');
+    return res.json();
+};
+
 // --- Orders ---
 
 export const getOrders = async (): Promise<ServiceOrder[]> => {
@@ -212,4 +232,10 @@ export const restoreBackup = async (jsonData: string) => {
 
 export const initializeData = async () => {
     // No-op, backend handles seeding
+};
+
+export const getAuditLogs = async (page = 1, limit = 20) => {
+    const res = await fetch(`${API_URL}/audit?page=${page}&limit=${limit}`);
+    if (!res.ok) throw new Error('Failed to fetch audit logs');
+    return res.json();
 };

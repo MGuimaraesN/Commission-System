@@ -25,6 +25,8 @@ app.delete('/api/orders/:id', ordersController.deleteOrder);
 
 // Periods
 app.get('/api/periods', periodsController.getPeriods);
+app.post('/api/periods', periodsController.createPeriod);
+app.put('/api/periods/:id', periodsController.updatePeriod);
 app.post('/api/periods/:id/pay', periodsController.payPeriod);
 
 // Dashboard

@@ -7,6 +7,7 @@ import { Periods } from './pages/Periods';
 import { Brands } from './pages/Brands';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
+import { Audit } from './pages/Audit';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 const App: React.FC = () => {
@@ -47,6 +48,12 @@ const App: React.FC = () => {
           <Route path="/settings" element={
             <Layout>
               <Settings />
+            </Layout>
+          } />
+
+          <Route path="/audit" element={
+            <Layout>
+              <Audit />
             </Layout>
           } />
 

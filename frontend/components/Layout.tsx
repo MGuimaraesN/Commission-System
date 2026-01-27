@@ -107,6 +107,7 @@ export const Layout = ({ children }: LayoutProps) => {
           <SidebarItem to="/brands" icon={Tags} label={t('common.brands')} />
           <SidebarItem to="/reports" icon={FileBarChart} label={t('common.reports')} />
           <SidebarItem to="/settings" icon={Settings} label={t('common.settings')} />
+          <SidebarItem to="/audit" icon={ClipboardList} label="Auditoria" />
         </nav>
 
         <div className="mt-auto pt-6 border-t border-slate-200 dark:border-white/5">
@@ -142,6 +143,7 @@ export const Layout = ({ children }: LayoutProps) => {
           <SidebarItem to="/brands" icon={Tags} label={t('common.brands')} />
           <SidebarItem to="/reports" icon={FileBarChart} label={t('common.reports')} />
           <SidebarItem to="/settings" icon={Settings} label={t('common.settings')} />
+          <SidebarItem to="/audit" icon={ClipboardList} label="Auditoria" />
         </nav>
       </div>
 

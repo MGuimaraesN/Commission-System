@@ -71,3 +71,46 @@ export const payPeriod = async (req: Request, res: Response): Promise<any> => {
     res.status(500).json({ error: e.message });
   }
 };
+
+export const createPeriod = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { startDate, endDate } = req.body;
+        // Basic Validation
+        if (!startDate || !endDate) return res.status(400).json({ error: "Dates required" });
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        // Check overlap? For now, just create.
+        // Or unique constraint might trigger if same dates.
+
+        const period = await prisma.period.create({
+            data: {
+                startDate: start,
+                endDate: end,
+                paid: false
+            }
+        });
+        res.json(period);
+    } catch(e: any) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+export const updatePeriod = async (req: Request, res: Response): Promise<any> => {
+    const id = req.params.id as string;
+    try {
+        const { startDate, endDate } = req.body;
+        const data: any = {};
+        if (startDate) data.startDate = new Date(startDate);
+        if (endDate) data.endDate = new Date(endDate);
+
+        const period = await prisma.period.update({
+            where: { id },
+            data
+        });
+        res.json(period);
+    } catch(e: any) {
+        res.status(500).json({ error: e.message });
+    }
+};
