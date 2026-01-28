@@ -95,6 +95,8 @@ const dictionary = {
     periods: {
       title: "Períodos",
       subtitle: "Gerencie fechamentos quinzenais de comissão.",
+      newPeriod: "Novo Período",
+      editPeriod: "Editar Período",
       openPeriod: "Período Aberto",
       closedPaid: "Fechado & Pago",
       serviceOrders: "Ordens de Serviço",
@@ -104,7 +106,9 @@ const dictionary = {
       markAsPaid: "Marcar como Pago",
       noPeriods: "Nenhum período ainda",
       noPeriodsMsg: "Períodos são gerados automaticamente ao criar a primeira ordem de serviço.",
-      confirmClose: "Fechar este período irá bloquear todas as ordens associadas e marcá-las como PAGO. Continuar?"
+      confirmClose: "Fechar este período irá bloquear todas as ordens associadas e marcá-las como PAGO. Continuar?",
+      startDate: "Data Início",
+      endDate: "Data Fim"
     },
     brands: {
       title: "Marcas",
@@ -274,6 +278,8 @@ const dictionary = {
     periods: {
       title: "Periods",
       subtitle: "Manage bi-weekly commission closures.",
+      newPeriod: "New Period",
+      editPeriod: "Edit Period",
       openPeriod: "Open Period",
       closedPaid: "Closed & Paid",
       serviceOrders: "Service Orders",
@@ -283,7 +289,9 @@ const dictionary = {
       markAsPaid: "Mark as Paid",
       noPeriods: "No periods yet",
       noPeriodsMsg: "Periods are automatically generated when you create your first service order.",
-      confirmClose: "Closing this period will lock all associated orders and mark them as PAID. This cannot be undone. Continue?"
+      confirmClose: "Closing this period will lock all associated orders and mark them as PAID. This cannot be undone. Continue?",
+      startDate: "Start Date",
+      endDate: "End Date",
     },
     brands: {
       title: "Brands",

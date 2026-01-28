@@ -87,19 +87,19 @@ export const Periods: React.FC = () => {
             <p className="text-slate-500 dark:text-slate-400 mt-1">{t('periods.subtitle')}</p>
         </div>
         <Button onClick={openCreate} icon={<Plus size={18} />}>
-            New Period
+            {t('periods.newPeriod')}
         </Button>
       </div>
 
       {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-              <Card className="w-full max-w-sm" title={editingId ? "Edit Period" : "New Period"}>
+              <Card className="w-full max-w-sm" title={editingId ? t('periods.editPeriod') : t('periods.newPeriod')}>
                   <form onSubmit={handleSubmit} className="space-y-4">
-                      <Input type="date" label="Start Date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} required />
-                      <Input type="date" label="End Date" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} required />
+                      <Input type="date" label={t('periods.startDate')} value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} required />
+                      <Input type="date" label={t('periods.endDate')} value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} required />
                       <div className="flex gap-2 pt-2">
-                          <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1">Cancel</Button>
-                          <Button type="submit" className="flex-1">Save</Button>
+                          <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1">{t('common.cancel')}</Button>
+                          <Button type="submit" className="flex-1">{t('common.save')}</Button>
                       </div>
                   </form>
               </Card>
