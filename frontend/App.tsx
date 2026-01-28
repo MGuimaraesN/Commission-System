@@ -3,7 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { ServiceOrders } from './pages/ServiceOrders';
-import { Periods } from './pages/Periods';
+// import { Periods } from './pages/Periods';
 import { Brands } from './pages/Brands';
 import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
@@ -27,11 +27,11 @@ const App: React.FC = () => {
             </Layout>
           } />
 
-          <Route path="/periods" element={
+          { /* <Route path="/periods" element={
             <Layout>
               <Periods />
             </Layout>
-          } />
+          } /> */}
 
           <Route path="/brands" element={
             <Layout>

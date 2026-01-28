@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import * as ordersController from './controllers/orders.controller';
-import * as periodsController from './controllers/periods.controller';
+// import * as periodsController from './controllers/periods.controller';
 import * as dashboardController from './controllers/dashboard.controller';
 import * as settingsController from './controllers/settings.controller';
 import * as brandsController from './controllers/brands.controller';
@@ -24,11 +24,11 @@ app.put('/api/orders/:id', ordersController.updateOrder);
 app.delete('/api/orders/:id', ordersController.deleteOrder);
 
 // Periods
-app.get('/api/periods', periodsController.getPeriods);
-app.post('/api/periods', periodsController.createPeriod);
-app.put('/api/periods/:id', periodsController.updatePeriod);
-app.delete('/api/periods/:id', periodsController.deletePeriod);
-app.post('/api/periods/:id/pay', periodsController.payPeriod);
+// app.get('/api/periods', periodsController.getPeriods);
+// app.post('/api/periods', periodsController.createPeriod);
+// app.put('/api/periods/:id', periodsController.updatePeriod);
+// app.delete('/api/periods/:id', periodsController.deletePeriod);
+// app.post('/api/periods/:id/pay', periodsController.payPeriod);
 
 // Dashboard
 app.get('/api/dashboard', dashboardController.getDashboard);

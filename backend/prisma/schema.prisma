@@ -46,7 +46,7 @@ model ServiceOrder {
   paymentMethod   String? // PIX, CASH, CARD, TRANSFER
   description     String?
   createdAt       DateTime   @default(now())
-  paidAt          DateTime
+  paidAt          DateTime?
   brandId         String
   brand           Brand      @relation(fields: [brandId], references: [id])
   periodId        String?

@@ -103,7 +103,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <nav className="flex-1 space-y-1.5">
           <SidebarItem to="/" icon={LayoutDashboard} label={t('common.dashboard')} />
           <SidebarItem to="/orders" icon={ClipboardList} label={t('common.serviceOrders')} badgeCount={pendingCount} />
-          <SidebarItem to="/periods" icon={Calendar} label={t('common.periods')} />
+          { /* <SidebarItem to="/periods" icon={Calendar} label={t('common.periods')} /> */ }
           <SidebarItem to="/brands" icon={Tags} label={t('common.brands')} />
           <SidebarItem to="/reports" icon={FileBarChart} label={t('common.reports')} />
           <SidebarItem to="/settings" icon={Settings} label={t('common.settings')} />
@@ -139,7 +139,7 @@ export const Layout = ({ children }: LayoutProps) => {
          <nav className="flex-1 space-y-2">
           <SidebarItem to="/" icon={LayoutDashboard} label={t('common.dashboard')} />
           <SidebarItem to="/orders" icon={ClipboardList} label={t('common.serviceOrders')} badgeCount={pendingCount} />
-          <SidebarItem to="/periods" icon={Calendar} label={t('common.periods')} />
+          { /* <SidebarItem to="/periods" icon={Calendar} label={t('common.periods')} /> */ }
           <SidebarItem to="/brands" icon={Tags} label={t('common.brands')} />
           <SidebarItem to="/reports" icon={FileBarChart} label={t('common.reports')} />
           <SidebarItem to="/settings" icon={Settings} label={t('common.settings')} />
