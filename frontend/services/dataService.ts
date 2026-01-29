@@ -24,6 +24,21 @@ export const saveSettings = async (settings: Partial<AppSettings>) => {
   return res.json();
 };
 
+// --- Backup ---
+export const getBackupData = async () => {
+  const response = await fetch(`${API_URL}/backup/export`);
+  return await response.json();
+};
+
+export const restoreBackup = async (content: string) => {
+  const response = await fetch(`${API_URL}/backup/import`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: content
+  });
+  return response.ok;
+};
+
 // --- Periods ---
 
 export const getPeriods = async (): Promise<Period[]> => {
@@ -224,20 +239,6 @@ export const getRankings = async () => {
     if (!res.ok) throw new Error('Failed to fetch dashboard');
     const data = await res.json();
     return data.rankings;
-};
-
-export const getBackupData = async () => {
-    // Return a dummy or fetch all
-    const orders = await getOrders();
-    const periods = await getPeriods();
-    const brands = await getBrands();
-    const settings = await getSettings();
-    return JSON.stringify({ orders, periods, brands, settings }, null, 2);
-};
-
-export const restoreBackup = async (jsonData: string) => {
-    console.warn("Restore backup not supported in V2 API yet.");
-    return false;
 };
 
 export const initializeData = async () => {

@@ -4,6 +4,7 @@ import * as ordersController from './controllers/orders.controller';
 // import * as periodsController from './controllers/periods.controller';
 import * as dashboardController from './controllers/dashboard.controller';
 import * as settingsController from './controllers/settings.controller';
+import * as backupController from './controllers/backup.controller';
 import * as brandsController from './controllers/brands.controller';
 import * as auditController from './controllers/audit.controller';
 
@@ -36,6 +37,10 @@ app.get('/api/dashboard', dashboardController.getDashboard);
 // Settings
 app.get('/api/settings', settingsController.getSettings);
 app.put('/api/settings', settingsController.updateSettings);
+
+// Backup
+app.get('/api/backup/export', backupController.exportDatabase);
+app.post('/api/backup/import', backupController.importDatabase);
 
 // Brands
 app.get('/api/brands', brandsController.getBrands);

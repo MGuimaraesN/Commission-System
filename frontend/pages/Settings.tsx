@@ -62,38 +62,38 @@ export const Settings: React.FC = () => {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleExportBackup = () => {
-      const data = getBackupData();
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `commission_backup_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  };
+    // Ajuste a função de exportação
+    const handleExportBackup = async () => {
+        const data = await getBackupData(); // Agora é async
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `commission_backup_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+    };
 
-  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+    // Ajuste a função de importação
+    const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-          const content = event.target?.result as string;
-          if (confirm(t('settings.restoreConfirm'))) {
-              const success = restoreBackup(content);
-              if (success) {
-                  alert(t('settings.restoreSuccess'));
-                  window.location.reload();
-              } else {
-                  alert(t('settings.restoreFail'));
-              }
-          }
-      };
-      reader.readAsText(file);
-      e.target.value = ''; // Reset input
-  };
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const content = event.target?.result as string;
+            if (confirm(t('settings.restoreConfirm'))) {
+                const success = await restoreBackup(content); // Agora é async
+                if (success) {
+                    alert(t('settings.restoreSuccess'));
+                    window.location.reload();
+                } else {
+                    alert(t('settings.restoreFail'));
+                }
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; 
+    };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
