@@ -99,27 +99,40 @@ export const Reports: React.FC = () => {
   const generateExcel = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Relatorio_Comissao");
+    const settings = await getSettings().catch(() => ({}) as any);
 
     // Define Columns with Styling Logic setup
     worksheet.columns = [
       { header: "Data", key: "date", width: 15, style: { alignment: { horizontal: 'center' } } },
-      { header: "Número da O.S", key: "osNumber", width: 15, style: { alignment: { horizontal: 'center' } } },
-      { header: "Cliente", key: "customer", width: 35 },
+      { header: "O.S", key: "osNumber", width: 15, style: { alignment: { horizontal: 'center' } } },
+      { header: "Cliente", key: "customer", width: 35, style: { alignment: { horizontal: 'center' } } },
       { header: "Marca", key: "brand", width: 20, style: { alignment: { horizontal: 'center' } } },
-      { header: "Valor (R$)", key: "service", width: 18, style: { numFmt: '"R$"#,##0.00' } },
-      { header: "Comissão (R$)", key: "commission", width: 18, style: { numFmt: '"R$"#,##0.00' } },
+      { header: "Valor (R$)", key: "service", width: 18, style: { numFmt: '_-R$ * #,##0.00_-;-R$ * #,##0.00_-;_-R$ * "-"??_-;_-@_-', alignment: { horizontal: 'center' } } },
+      { header: "Comissão (R$)", key: "commission", width: 18, style: { numFmt: '_-R$ * #,##0.00_-;-R$ * #,##0.00_-;_-R$ * "-"??_-;_-@_-', alignment: { horizontal: 'center' } } },
       { header: "Status", key: "status", width: 15, style: { alignment: { horizontal: 'center' } } },
     ];
 
     // Header Styling
+    const primaryColorHex = settings.primaryColor || '#6366f1';
     const headerRow = worksheet.getRow(1);
     headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    headerRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF6366F1' } // Indigo 500
-    };
-    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    worksheet.columns.forEach((_, index) => {
+        const cell = headerRow.getCell(index + 1);
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: primaryColorHex.replace('#', '') } // Indigo 500
+        };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        // Borda externa do cabeçalho
+        cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+        };
+    });
 
     reportData.forEach(o => {
       worksheet.addRow({
@@ -135,18 +148,34 @@ export const Reports: React.FC = () => {
 
     // Totals Row - Clean, only relevant columns
     const totalRow = worksheet.addRow({
-        date: "TOTAL",
-        commission: totals.commission,
-        service: totals.service // Add service total for completeness in value column, or keep empty if strict requirements?
-        // Prompt says: "Remova linhas de totalizadores intermediários". This is the FINAL total row.
-        // It says "O arquivo deve conter apenas as colunas: Data, Número da O.S, Cliente, Marca, Valor, Comissão e Status."
-        // And "Remova o preenchimento de células desnecessárias".
-        // I will keep the final Total row but ensure it matches columns.
+        date: "TOTAL DE COMISSÃO NO PERÍODO",
+        commission: totals.commission
     });
+
+    // 2. Mesclagem das células para o texto "TOTAL DO PERÍODO"
+    const currentRow = totalRow.number;
+    worksheet.mergeCells(currentRow, 1, currentRow, 5);
+
+    // 3. Estilização do texto mesclado (TOTAL DO PERÍODO)
+    const mergedCell = totalRow.getCell(1); // A célula inicial da mesclagem
+    mergedCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
     totalRow.font = { bold: true };
-    totalRow.getCell('commission').numFmt = '"R$"#,##0.00';
-    totalRow.getCell('service').numFmt = '"R$"#,##0.00'; // Format service too if included
-    totalRow.getCell('date').alignment = { horizontal: 'right' };
+    totalRow.getCell('commission').numFmt = '_-R$ * #,##0.00_-;-R$ * #,##0.00_-;_-R$ * "-"??_-;_-@_-';
+    totalRow.getCell('service').numFmt = '_-R$ * #,##0.00_-;-R$ * #,##0.00_-;_-R$ * "-"??_-;_-@_-';
+    totalRow.getCell('date').alignment = { horizontal: 'center' };
+
+    worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell) => {
+            if (rowNumber === 1) return; // Pula cabeçalho já estilizado
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+    });
 
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -300,7 +329,7 @@ export const Reports: React.FC = () => {
             startY: cursorY,
             head: [[
                 "Data",
-                "Número da O.S",
+                "O.S",
                 "Cliente",
                 "Marca",
                 "Valor (R$)",
@@ -316,29 +345,29 @@ export const Reports: React.FC = () => {
                 cellPadding: 3,
                 textColor: [60, 60, 60],
                 lineWidth: 0,
-                overflow: 'visible' // Prevent truncation logic
+                overflow: 'linebreak', // Garante que o texto quebre a linha se não couber
             },
             headStyles: {
                 fillColor: primaryColorHex,
                 textColor: 255,
                 fontStyle: 'bold',
                 halign: 'center', // Centered headers
-                cellPadding: 4
+                cellPadding: 3
             },
             footStyles: {
                 fillColor: [248, 248, 248],
-                cellPadding: 4,
+                cellPadding: 3,
                 lineColor: [220, 220, 220],
                 lineWidth: { top: 0.1 }
             },
             columnStyles: {
-                0: { cellWidth: 22, halign: 'center' }, // Data (Centered)
-                1: { cellWidth: 28, halign: 'center' }, // Número da O.S (Centered)
-                2: { cellWidth: 'auto', halign: 'left' }, // Cliente
-                3: { cellWidth: 25, halign: 'center' }, // Marca (Centered)
-                4: { cellWidth: 28, halign: 'right' }, // Valor (R$)
-                5: { cellWidth: 28, halign: 'right' }, // Comissão (R$)
-                6: { cellWidth: 25, halign: 'center' } // Status
+                0: { cellWidth: 20, halign: 'center' }, // Data (Centered)
+                1: { cellWidth: 20, halign: 'center' }, // Número da O.S (Centered)
+                2: { cellWidth: 'auto', halign: 'center' }, // Cliente
+                3: { cellWidth: 28, halign: 'center' }, // Marca (Centered)
+                4: { cellWidth: 28, halign: 'center' }, // Valor (R$)
+                5: { cellWidth: 28, halign: 'center' }, // Comissão (R$)
+                6: { cellWidth: 22, halign: 'center' } // Status
             },
             didParseCell: (data) => {
                 // Zebra stripes
