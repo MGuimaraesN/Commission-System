@@ -705,7 +705,7 @@ export const ServiceOrders: React.FC = () => {
                 <th className="px-6 py-4 font-semibold">{t('orders.brand')}</th>
                 <th className="px-6 py-4 font-semibold text-right">{t('common.value')}</th>
                 <th className="px-6 py-4 font-semibold text-right">{t('dashboard.commission')}</th>
-                <th className="px-6 py-4 font-semibold text-center">Status</th>
+                <th className="px-6 py-4 font-semibold text-center">{t('orders.status')}</th>
                 <th className="px-6 py-4 font-semibold text-right">{t('common.actions')}</th>
               </tr>
             </thead>

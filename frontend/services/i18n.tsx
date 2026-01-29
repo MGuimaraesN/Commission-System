@@ -91,7 +91,8 @@ const dictionary = {
       paidOn: "Pago em",
       errorRequired: "Preencha todos os campos obrigatórios.",
       errorPositive: "Valor do serviço deve ser positivo.",
-      errorFuture: "Data não pode ser no futuro."
+      errorFuture: "Data não pode ser no futuro.",
+      status: "Status"
     },
     periods: {
       title: "Períodos",
@@ -276,7 +277,8 @@ const dictionary = {
       paidOn: "Paid on",
       errorRequired: "Please fill in all required fields.",
       errorPositive: "Service value must be a positive number.",
-      errorFuture: "Order date cannot be in the future."
+      errorFuture: "Order date cannot be in the future.",
+      status: "Status"
     },
     periods: {
       title: "Periods",
