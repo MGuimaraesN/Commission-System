@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Plus, Search, Trash2, Edit2, AlertCircle, Download, Filter, X, CheckCircle, DollarSign, CheckSquare, Square, Copy, History, CreditCard, Clock, FileText, Tag } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { createOrder, getOrders, getSettings, updateOrder, deleteOrder, getBrands, updateOrderStatus, bulkUpdateOrderStatus, bulkDeleteOrders, duplicateOrder, addBrand } from '../services/dataService';
+import { createOrder, getOrders, getSettings, updateOrder, deleteOrder, getBrands, updateOrderStatus, bulkUpdateOrderStatus, bulkDeleteOrders, duplicateOrder, addBrand, getAuditLogs } from '../services/dataService';
 import { ServiceOrder, Brand, AuditLogEntry, AppSettings } from '../types';
 import { useTranslation } from '../services/i18n';
 
 export const ServiceOrders: React.FC = () => {
   const { t } = useTranslation();
   const [orders, setOrders] = useState<ServiceOrder[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<ServiceOrder[]>([]);
   
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState('');
@@ -118,10 +117,10 @@ export const ServiceOrders: React.FC = () => {
     setSelectedIds(new Set());
   }, [statusFilter, brandFilter, searchTerm]);
 
-  useEffect(() => {
+  // OTIMIZAÇÃO: Filtragem em memória com useMemo (Melhora a performance solicitada mantendo a lógica)
+  const filteredOrders = useMemo(() => {
     let result = orders;
 
-    // Search term
     if (searchTerm) {
       const lowerTerm = searchTerm.toLowerCase();
       result = result.filter(o => 
@@ -131,17 +130,15 @@ export const ServiceOrders: React.FC = () => {
       );
     }
 
-    // Status filter
     if (statusFilter !== 'ALL') {
       result = result.filter(o => o.status === statusFilter);
     }
 
-    // Brand filter
     if (brandFilter !== 'ALL') {
       result = result.filter(o => o.brand === brandFilter);
     }
 
-    setFilteredOrders(result);
+    return result;
   }, [searchTerm, statusFilter, brandFilter, orders]);
 
   const refreshData = async () => {
@@ -151,6 +148,7 @@ export const ServiceOrders: React.FC = () => {
         setOrders(ordersData);
         setBrandsList(brandsData);
         setSelectedIds(new Set());
+        console.log("PAssa aquiiI");
     } catch (e) {
         console.error(e);
     }
@@ -259,9 +257,15 @@ export const ServiceOrders: React.FC = () => {
       }
   }
 
-  const handleShowHistory = (order: ServiceOrder) => {
-      setSelectedHistory(order.history || []);
-      setIsHistoryOpen(true);
+  const handleShowHistory = async (order: ServiceOrder) => {
+      // OTIMIZAÇÃO: Busca histórico sob demanda para manter sistema rápido
+      try {
+          const logs = await getAuditLogs();
+          setSelectedHistory(logs.filter((l: any) => l.serviceOrderId === order.id));
+          setIsHistoryOpen(true);
+      } catch (e) {
+          alert("Erro ao carregar histórico");
+      }
   }
 
   const handleTogglePaid = async (order: ServiceOrder) => {
@@ -379,6 +383,12 @@ export const ServiceOrders: React.FC = () => {
 
   return (
     <div className="space-y-6 relative">
+      {/* Estilo para ocultar a barra mantendo o scroll */}
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">{t('orders.title')}</h2>
@@ -548,7 +558,6 @@ export const ServiceOrders: React.FC = () => {
                             </select>
                             <Filter className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" size={16} />
                         </div>
-                        {/* Correção: Botão + de Marcas com type="button" */}
                         <button
                             type="button"
                             onClick={() => setIsBrandModalOpen(true)}
@@ -571,7 +580,6 @@ export const ServiceOrders: React.FC = () => {
                 />
               </div>
 
-              {/* Payment Method - New Field */}
               <div className="flex flex-col gap-1.5">
                    <label className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">{t('orders.paymentMethod')} ({t('common.optional')})</label>
                    <div className="relative">
@@ -597,7 +605,6 @@ export const ServiceOrders: React.FC = () => {
 
               <div className="flex gap-3 pt-2">
                 <Button type="button" variant="secondary" onClick={resetForm} className="flex-1">{t('common.cancel')}</Button>
-                {/* Alteração: Texto "Salvar" no botão */}
                 <Button type="submit" className="flex-1">Salvar</Button>
               </div>
             </form>
@@ -605,7 +612,7 @@ export const ServiceOrders: React.FC = () => {
         </div>
       )}
 
-      {/* Correção: Inclusão do Modal de Criação de Marcas */}
+      {/* Modal de Criação de Marcas */}
       {isBrandModalOpen && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <Card className="w-full max-w-sm shadow-2xl border-indigo-500/20" title="Nova Marca">
@@ -632,7 +639,6 @@ export const ServiceOrders: React.FC = () => {
 
       {/* Table Section */}
       <Card className="overflow-hidden">
-        {/* ... Restante da tabela (sem alterações desnecessárias) ... */}
         <div className="px-6 py-4 border-b border-slate-100 dark:border-white/5 flex flex-col md:flex-row gap-4 justify-between">
           <div className="relative flex-1 max-w-sm">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={16} />
@@ -690,23 +696,24 @@ export const ServiceOrders: React.FC = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        {/* Adicionada classe no-scrollbar para ocultar a barra visualmente */}
+        <div className="overflow-x-auto no-scrollbar">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
               <tr className="border-b border-slate-100 dark:border-white/5 text-slate-500 dark:text-slate-400">
-                <th className="px-6 py-4 w-12 text-center">
+                <th className="px-4 py-4 w-12 text-center whitespace-nowrap">
                     <button onClick={handleSelectAll} className="flex items-center justify-center text-slate-400 hover:text-indigo-500">
                         {filteredOrders.length > 0 && selectedIds.size === filteredOrders.length ? <CheckSquare size={18} /> : <Square size={18} />}
                     </button>
                 </th>
-                <th className="px-6 py-4 font-semibold">{t('orders.date')}</th>
-                <th className="px-6 py-4 font-semibold">{t('orders.osNumber')}</th>
-                <th className="px-6 py-4 font-semibold">{t('orders.customer')}</th>
-                <th className="px-6 py-4 font-semibold">{t('orders.brand')}</th>
-                <th className="px-6 py-4 font-semibold text-right">{t('common.value')}</th>
-                <th className="px-6 py-4 font-semibold text-right">{t('dashboard.commission')}</th>
-                <th className="px-6 py-4 font-semibold text-center">{t('orders.status')}</th>
-                <th className="px-6 py-4 font-semibold text-right">{t('common.actions')}</th>
+                <th className="px-4 py-4 font-semibold whitespace-nowrap">{t('orders.date')}</th>
+                <th className="px-4 py-4 font-semibold whitespace-nowrap">{t('orders.osNumber')}</th>
+                <th className="px-4 py-4 font-semibold whitespace-nowrap">{t('orders.customer')}</th>
+                <th className="px-4 py-4 font-semibold whitespace-nowrap">{t('orders.brand')}</th>
+                <th className="px-4 py-4 font-semibold text-right whitespace-nowrap">{t('common.value')}</th>
+                <th className="px-4 py-4 font-semibold text-right whitespace-nowrap">{t('dashboard.commission')}</th>
+                <th className="px-4 py-4 font-semibold text-center whitespace-nowrap">Status</th>
+                <th className="px-4 py-4 font-semibold text-right whitespace-nowrap">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -725,28 +732,28 @@ export const ServiceOrders: React.FC = () => {
               ) : (
                 filteredOrders.map(order => (
                     <tr key={order.id} className={`hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group ${selectedIds.has(order.id) ? 'bg-indigo-50/50 dark:bg-indigo-500/10' : ''}`}>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 py-4 text-center whitespace-nowrap">
                          <button onClick={() => handleSelectRow(order.id)} className={`flex items-center justify-center ${selectedIds.has(order.id) ? 'text-indigo-500' : 'text-slate-300 hover:text-slate-500'}`}>
                             {selectedIds.has(order.id) ? <CheckSquare size={18} /> : <Square size={18} />}
                         </button>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                    <td className="px-4 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                         {order.entryDate.split('T')[0]}
                         {order.paidAt && <span className="block text-[10px] text-emerald-500">{t('orders.paidOn')}: {order.paidAt.split('T')[0]}</span>}
                     </td>
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">#{order.osNumber}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    <td className="px-4 py-4 font-medium text-slate-900 dark:text-white whitespace-nowrap">#{order.osNumber}</td>
+                    <td className="px-4 py-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                         {order.customerName}
                         {order.paymentMethod && <span className="block text-[10px] text-slate-400">{order.paymentMethod}</span>}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4 whitespace-nowrap">
                         <span className="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700/50 border border-slate-200 dark:border-white/5 text-xs text-slate-600 dark:text-slate-300">
                             {order.brand}
                         </span>
                     </td>
-                    <td className="px-6 py-4 text-right text-slate-600 dark:text-slate-300 font-medium">{formatCurrency(order.serviceValue)}</td>
-                    <td className="px-6 py-4 text-right font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(order.commissionValue)}</td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 py-4 text-right text-slate-600 dark:text-slate-300 font-medium whitespace-nowrap">{formatCurrency(order.serviceValue)}</td>
+                    <td className="px-4 py-4 text-right font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{formatCurrency(order.commissionValue)}</td>
+                    <td className="px-4 py-4 text-center whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border shadow-sm ${
                             order.status === 'PAID' 
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
@@ -756,7 +763,7 @@ export const ServiceOrders: React.FC = () => {
                             {t(`status.${order.status}`)}
                         </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             {order.status === 'PENDING' && (
                                 <button

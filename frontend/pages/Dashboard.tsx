@@ -244,7 +244,7 @@ export const Dashboard: React.FC = () => {
         {/* Line Chart Melhorado */}
         <Card className="lg:col-span-2 min-h-[400px]" title="Evolução Diária de Valor (O.S.)">
           <div className="h-[320px] w-full mt-4">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+            <ResponsiveContainer width="100%" height={320} debounce={50} minWidth={0}>
               <AreaChart data={lineData}>
                 <defs>
                   <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
@@ -300,7 +300,7 @@ export const Dashboard: React.FC = () => {
         {/* Donut Chart Completo e Popup Bonito */}
         <Card title="Status das O.S">
           <div className="h-[320px] w-full flex items-center justify-center relative">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+            <ResponsiveContainer width="100%" height={320} debounce={50} minWidth={0}>
               <PieChart>
                 <Pie
                   data={pieData}
