@@ -190,6 +190,24 @@ export const Reports: React.FC = () => {
         doc.text(`CNPJ: ${settings.companyCnpj}`, marginLeft, cursorY);
     }
 
+    // Address (Left)
+    if (settings.companyAddress) {
+        cursorY += 5;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80, 80, 80);
+        doc.text(settings.companyAddress, marginLeft, cursorY);
+    }
+
+    // Contact (Left)
+    if (settings.companyContact) {
+        cursorY += 5;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80, 80, 80);
+        doc.text(`Contato: ${settings.companyContact}`, marginLeft, cursorY);
+    }
+
     // Report Title (Right)
     const titleY = 20;
     doc.setFontSize(14);
