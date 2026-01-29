@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./backend
+    container_name: commission-backend
+    restart: always
+    ports:
+      - "3020:3020"
+    environment:
+      - PORT=3020
+      # Aponta o SQLite para um volume persistente dentro do container
+      - DATABASE_URL=file:/app/data/prod.db
+    volumes:
+      # Persistência do banco de dados SQLite
+      - sqlite_data:/app/data
+
+  frontend:
+    build: ./frontend
+    container_name: commission-frontend
+    restart: always
+    ports:
+      - "3000:80" # Acessar no navegador via localhost:3000
+    depends_on:
+      - backend
+
+volumes:
+  sqlite_data:
